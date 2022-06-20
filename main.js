@@ -2,6 +2,7 @@ var canvas;
 var canvasContext;
 var ballX = 50;
 var ballY = 50;
+var ballSpeed = 1;
 
 window.onload = function()
 {
@@ -9,43 +10,40 @@ window.onload = function()
   canvasContext = canvas.getContext('2d');
 
   var framesPerSecond = 144;
-  setInterval(() => { draw(); ballMove(); }, 1000 / framesPerSecond);
+  setInterval(() => { drawning(); ballMove(); }, 1000 / framesPerSecond);
 
 }
 
-function draw()
+function drawning()
 {
-  drawGround();
-  drawRacquet();
-  drawBall();
+  //ground
+  drawObject (0, 0, canvas.clientWidth, canvas.clientHeight, 'black');
+
+  //left racquet
+  drawObject(5, canvas.clientHeight / 2 - 50, 10, 100, 'white');
+
+  //ball
+  drawObject(ballX,  ballY, 20, 20, 'green');
 }
 
-function drawGround()
+function drawObject(leftX, topY, width, height, color)
 {
-  canvasContext.fillStyle = 'black';
-  canvasContext.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-}
-
-function drawRacquet()
-{
-  canvasContext.fillStyle = "white";
-  canvasContext.fillRect(5, canvas.clientHeight / 2 - 50, 10, 100);
-}
-
-function drawBall()
-{
-  canvasContext.fillStyle = "green";
-  canvasContext.fillRect(ballX,  ballY, 20, 20);
+  canvasContext.fillStyle = color;
+  canvasContext.fillRect(leftX, topY, width, height);
 }
 
 function ballMove()
 {
-  ballX += 1;
-  ballY += 1;
+  ballX += ballSpeed;
+  ballY += ballSpeed;
 
   if(ballX >= canvas.clientWidth || ballY >= canvas.clientHeight)
   {
-    ballX = Math.random() * canvas.clientWidth;
-    ballY = Math.random() * canvas.clientHeight;
+    ballSpeed = -ballSpeed;
+  }
+
+  else if(ballX <= 0 || ballY <= 0)
+  {
+    ballSpeed = -ballSpeed;
   }
 }
