@@ -17,19 +17,27 @@ window.onload = function()
 function drawning()
 {
   //ground
-  drawObject (0, 0, canvas.clientWidth, canvas.clientHeight, 'black');
+  drawRect (0, 0, canvas.clientWidth, canvas.clientHeight, 'black');
 
   //left racquet
-  drawObject(5, canvas.clientHeight / 2 - 50, 10, 100, 'white');
+  drawRect(5, canvas.clientHeight / 2 - 50, 10, 100, 'white');
 
   //ball
-  drawObject(ballX,  ballY, 20, 20, 'green');
+  drawBall(ballX, ballY, 10, 'green');
 }
 
-function drawObject(leftX, topY, width, height, color)
+function drawRect(leftX, topY, width, height, color)
 {
   canvasContext.fillStyle = color;
   canvasContext.fillRect(leftX, topY, width, height);
+}
+
+function drawBall(centerX, centerY, radius, color)
+{
+  canvasContext.fillStyle = color;
+  canvasContext.beginPath();
+  canvasContext.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
+  canvasContext.fill();
 }
 
 function ballMove()
