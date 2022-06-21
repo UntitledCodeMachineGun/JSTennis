@@ -1,19 +1,24 @@
 var canvas;
 var canvasContext;
 
-var framesPerSecond = 144;
+var framesPerSecond = 60;
 
 var ballX = 50;
 var ballY = 50;
-var ballSpeedX = 4;
-var ballSpeedY = 2;
+var ballSpeedX = 5;
+var ballSpeedY = 2.5;
+var accelerate = 0.05;
 
 var racqLY = 250;
 var racqRY = 250;
 
-const RACQ_LHEIGHT = 100;
+var scoreP1 = 0;
+var scoreP2 = 0;
+
+const RACQ_HEIGHT = 100;
 const RACQ_THICKNESS = 10;
 const RACQ_INDENT = 5;
+const CHUNK = RACQ_HEIGHT / 2 - 15;
 
 function calculateMousePos(evt)
 {
@@ -33,14 +38,14 @@ window.onload = function()
   canvas = document.getElementById('playGround');
   canvasContext = canvas.getContext('2d');
 
-  setInterval(() => { drawning(); ballMove(); }, 1000 / framesPerSecond);
+  setInterval(() => { drawning(); moving(); }, 1000 / framesPerSecond);;
+}
 
-  canvas.addEventListener('mousemove', 
-    function(evt)
-    {
-      var mousePos = calculateMousePos(evt);
-      racqLY = mousePos.y - RACQ_LHEIGHT / 2;
-    });
+function moving()
+{
+  leftRacqMove();
+  rightRacqMove();
+  ballMove();
 }
 
 function drawning()
@@ -49,13 +54,27 @@ function drawning()
   drawRect (0, 0, canvas.width, canvas.height, 'black');
 
   //left racquet
-  drawRect(RACQ_INDENT, racqLY, RACQ_THICKNESS, RACQ_LHEIGHT, 'white');
+  drawRect(RACQ_INDENT, racqLY, RACQ_THICKNESS, RACQ_HEIGHT, 'white');
 
   //right racquet
-  drawRect(canvas.width - RACQ_THICKNESS - RACQ_INDENT, racqRY, RACQ_THICKNESS, RACQ_LHEIGHT, 'white');
+  drawRect(canvas.width - RACQ_THICKNESS - RACQ_INDENT, racqRY, RACQ_THICKNESS, RACQ_HEIGHT, 'white');
 
   //ball
   drawBall(ballX, ballY, 10, 'green');
+
+  canvasContext.font = '25px s';
+
+  //Player 1 score
+  drawScore(scoreP1, 100, 100, 'white');
+  
+  //Player 2 score
+  drawScore(scoreP2, canvas.width - 100, 100, 'white');
+}
+
+function drawScore(score, leftX, topY, color)
+{
+  canvasContext.fillStyle = color;
+  canvasContext.fillText(score, leftX, topY);
 }
 
 function drawRect(leftX, topY, width, height, color)
@@ -79,35 +98,64 @@ function ballReset()
   ballSpeedX = -ballSpeedX;
 }
 
+function leftRacqMove()
+{
+  canvas.addEventListener('mousemove', 
+    function(evt)
+    {
+      var mousePos = calculateMousePos(evt);
+      racqLY = mousePos.y - RACQ_HEIGHT / 2;
+    });
+}
+
+function rightRacqMove()
+{
+  var racqRYCenter = racqRY + RACQ_HEIGHT / 2;
+  var chillZone = Math.random(CHUNK);
+
+  if(racqRYCenter < ballY - CHUNK)
+  {
+    racqRY += 4.5;
+  }
+  else if(racqRYCenter > ballY + CHUNK)
+  {
+    racqRY -= 4.5;
+  }
+}
+
 function ballMove()
 {
   ballX += ballSpeedX;
   ballY += ballSpeedY;
 
-  if(ballX > canvas.clientWidth - (RACQ_THICKNESS + RACQ_INDENT))
+  if(ballX > canvas.width - (RACQ_THICKNESS + RACQ_INDENT))
   {
-    if(ballY > racqRY && ballY < racqRY + RACQ_LHEIGHT)
+    if(ballY > racqRY && ballY < racqRY + RACQ_HEIGHT)
     {
-      ballSpeedX = -ballSpeedX;
+      ballSpeedX = -ballSpeedX - accelerate;
+      ballSpeedY += accelerate;
     }
     else
     {
       ballReset();
+      scoreP1++;
     }
   }
-  else if(ballY > canvas.clientHeight)
+  else if(ballY > canvas.height)
   {
     ballSpeedY = -ballSpeedY;
   }
   else if(ballX < (RACQ_THICKNESS + RACQ_INDENT))
   {
-    if(ballY > racqLY && ballY < racqLY + RACQ_LHEIGHT)
+    if(ballY > racqLY && ballY < racqLY + RACQ_HEIGHT)
     {
-      ballSpeedX = -ballSpeedX;
+      ballSpeedX = -ballSpeedX + accelerate;
+      ballSpeedY += accelerate;
     }
     else
     {
       ballReset();
+      scoreP2++;
     }
   }
   else if(ballY < 0)
