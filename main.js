@@ -5,11 +5,15 @@ var framesPerSecond = 144;
 
 var ballX = 50;
 var ballY = 50;
-var ballSpeedX = 1.5;
-var ballSpeedY = 0.6;
+var ballSpeedX = 4;
+var ballSpeedY = 2;
 
 var racqLY = 250;
+var racqRY = 250;
+
 const RACQ_LHEIGHT = 100;
+const RACQ_THICKNESS = 10;
+const RACQ_INDENT = 5;
 
 function calculateMousePos(evt)
 {
@@ -42,10 +46,13 @@ window.onload = function()
 function drawning()
 {
   //ground
-  drawRect (0, 0, canvas.clientWidth, canvas.clientHeight, 'black');
+  drawRect (0, 0, canvas.width, canvas.height, 'black');
 
   //left racquet
-  drawRect(5, racqLY, 10, RACQ_LHEIGHT, 'white');
+  drawRect(RACQ_INDENT, racqLY, RACQ_THICKNESS, RACQ_LHEIGHT, 'white');
+
+  //right racquet
+  drawRect(canvas.width - RACQ_THICKNESS - RACQ_INDENT, racqRY, RACQ_THICKNESS, RACQ_LHEIGHT, 'white');
 
   //ball
   drawBall(ballX, ballY, 10, 'green');
@@ -65,22 +72,43 @@ function drawBall(centerX, centerY, radius, color)
   canvasContext.fill();
 }
 
+function ballReset()
+{
+  ballX = canvas.width / 2;
+  ballY = canvas.height / 2;
+  ballSpeedX = -ballSpeedX;
+}
+
 function ballMove()
 {
   ballX += ballSpeedX;
   ballY += ballSpeedY;
 
-  if(ballX > canvas.clientWidth)
+  if(ballX > canvas.clientWidth - (RACQ_THICKNESS + RACQ_INDENT))
   {
-    ballSpeedX = -ballSpeedX;
+    if(ballY > racqRY && ballY < racqRY + RACQ_LHEIGHT)
+    {
+      ballSpeedX = -ballSpeedX;
+    }
+    else
+    {
+      ballReset();
+    }
   }
   else if(ballY > canvas.clientHeight)
   {
     ballSpeedY = -ballSpeedY;
   }
-  else if(ballX < 0)
+  else if(ballX < (RACQ_THICKNESS + RACQ_INDENT))
   {
-    ballSpeedX = -ballSpeedX;
+    if(ballY > racqLY && ballY < racqLY + RACQ_LHEIGHT)
+    {
+      ballSpeedX = -ballSpeedX;
+    }
+    else
+    {
+      ballReset();
+    }
   }
   else if(ballY < 0)
   {
