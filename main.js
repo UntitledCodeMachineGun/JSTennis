@@ -6,19 +6,22 @@ var framesPerSecond = 60;
 var ballX = 50;
 var ballY = 50;
 var ballSpeedX = 5;
-var ballSpeedY = 2.5;
-var accelerate = 0.05;
+var ballSpeedY = 3;
 
 var racqLY = 250;
 var racqRY = 250;
 
 var scoreP1 = 0;
 var scoreP2 = 0;
+var scoreToWin = 3;
+
+var _pause = false;
 
 const RACQ_HEIGHT = 100;
 const RACQ_THICKNESS = 10;
 const RACQ_INDENT = 5;
 const CHUNK = RACQ_HEIGHT / 2 - 15;
+const ACCELERATE_RATE = 0.35;
 
 function calculateMousePos(evt)
 {
@@ -38,7 +41,13 @@ window.onload = function()
   canvas = document.getElementById('playGround');
   canvasContext = canvas.getContext('2d');
 
-  setInterval(() => { drawning(); moving(); }, 1000 / framesPerSecond);;
+  setInterval(() => { if(_pause)
+                      {
+                        drawText(canvas.width / 2, 100, 'Click to continue', 'white');
+                        return;
+                      }
+                      drawning(); moving();
+                    }, 1000 / framesPerSecond);
 }
 
 function moving()
@@ -91,8 +100,21 @@ function drawBall(centerX, centerY, radius, color)
   canvasContext.fill();
 }
 
+function drawText(leftX, topY, text, color)
+{
+  canvasContext.fillStyle = color;
+  canvasContext.fillText(text, leftX, topY);
+}
+
 function ballReset()
 {
+  if(scoreP1 >= scoreToWin || scoreP2 >= scoreToWin)
+  {
+    scoreP1 = 0;
+    scoreP2 = 0;
+    _pause = !_pause;
+  }
+
   ballX = canvas.width / 2;
   ballY = canvas.height / 2;
   ballSpeedX = -ballSpeedX;
@@ -111,7 +133,6 @@ function leftRacqMove()
 function rightRacqMove()
 {
   var racqRYCenter = racqRY + RACQ_HEIGHT / 2;
-  var chillZone = Math.random(CHUNK);
 
   if(racqRYCenter < ballY - CHUNK)
   {
@@ -128,34 +149,40 @@ function ballMove()
   ballX += ballSpeedX;
   ballY += ballSpeedY;
 
-  if(ballX > canvas.width - (RACQ_THICKNESS + RACQ_INDENT))
+  if(ballX > canvas.width - (RACQ_THICKNESS + RACQ_INDENT) - 1)
   {
     if(ballY > racqRY && ballY < racqRY + RACQ_HEIGHT)
     {
-      ballSpeedX = -ballSpeedX - accelerate;
-      ballSpeedY += accelerate;
+      ballSpeedX = -ballSpeedX;
+      
+      let deltaY = ballY - (racqRY + RACQ_HEIGHT / 2);
+
+      ballSpeedY = deltaY * ACCELERATE_RATE;
     }
     else
     {
-      ballReset();
       scoreP1++;
+      ballReset();
     }
   }
   else if(ballY > canvas.height)
   {
     ballSpeedY = -ballSpeedY;
   }
-  else if(ballX < (RACQ_THICKNESS + RACQ_INDENT))
+  else if(ballX < (RACQ_THICKNESS + RACQ_INDENT) - 1)
   {
     if(ballY > racqLY && ballY < racqLY + RACQ_HEIGHT)
     {
-      ballSpeedX = -ballSpeedX + accelerate;
-      ballSpeedY += accelerate;
+      ballSpeedX = -ballSpeedX;
+
+      let deltaY = ballY - (racqLY + RACQ_HEIGHT / 2);
+
+      ballSpeedY = deltaY * ACCELERATE_RATE;
     }
     else
     {
-      ballReset();
       scoreP2++;
+      ballReset();
     }
   }
   else if(ballY < 0)
