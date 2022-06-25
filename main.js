@@ -3,10 +3,10 @@ var canvasContext;
 
 var framesPerSecond = 60;
 
-var ballX = 50;
-var ballY = 50;
-var ballSpeedX = 5;
-var ballSpeedY = 3;
+var ballX = 400;
+var ballY = 300;
+var ballSpeedX = 6;
+var ballSpeedY = 4;
 
 var racqLY = 250;
 var racqRY = 250;
@@ -15,13 +15,16 @@ var scoreP1 = 0;
 var scoreP2 = 0;
 var scoreToWin = 3;
 
-var _pause = false;
+var _pause = true;
+
+var nickName = '';
 
 const RACQ_HEIGHT = 100;
 const RACQ_THICKNESS = 10;
 const RACQ_INDENT = 5;
 const CHUNK = RACQ_HEIGHT / 2 - 15;
 const ACCELERATE_RATE = 0.35;
+const LEADERBOARD = document.getElementById('score');
 
 function calculateMousePos(evt)
 {
@@ -36,23 +39,40 @@ function calculateMousePos(evt)
   };
 }
 
+function handleMouseClick()
+{
+  if(_pause)
+  {
+    scoreP1 = 0;
+    scoreP2 = 0;
+    _pause = false;
+  }
+}
+
 window.onload = function()
 {
   canvas = document.getElementById('playGround');
   canvasContext = canvas.getContext('2d');
 
-  setInterval(() => { if(_pause)
-                      {
-                        drawText(canvas.width / 2, 100, 'Click to continue', 'white');
-                        return;
-                      }
-                      drawning(); moving();
-                    }, 1000 / framesPerSecond);
+  canvasContext.font = '25px s';
+
+  setInterval(() => { drawning();
+    
+    if(_pause)
+    {
+      drawText(canvas.width / 2, 100, 'Click to play', 'white');
+      return;
+    }
+
+    compMoving(); }, 1000 / framesPerSecond);
+
+  canvas.addEventListener('mousedown', handleMouseClick);
+
+  canvas.addEventListener('mousemove', function(evt) { leftRacqMove(evt); });
 }
 
-function moving()
+function compMoving()
 {
-  leftRacqMove();
   rightRacqMove();
   ballMove();
 }
@@ -70,8 +90,6 @@ function drawning()
 
   //ball
   drawBall(ballX, ballY, 10, 'green');
-
-  canvasContext.font = '25px s';
 
   //Player 1 score
   drawScore(scoreP1, 100, 100, 'white');
@@ -110,24 +128,19 @@ function ballReset()
 {
   if(scoreP1 >= scoreToWin || scoreP2 >= scoreToWin)
   {
-    scoreP1 = 0;
-    scoreP2 = 0;
-    _pause = !_pause;
+    _pause = true;
   }
 
   ballX = canvas.width / 2;
   ballY = canvas.height / 2;
   ballSpeedX = -ballSpeedX;
+  ballSpeedY = -ballSpeedY;
 }
 
-function leftRacqMove()
+function leftRacqMove(evt)
 {
-  canvas.addEventListener('mousemove', 
-    function(evt)
-    {
-      var mousePos = calculateMousePos(evt);
-      racqLY = mousePos.y - RACQ_HEIGHT / 2;
-    });
+  var mousePos = calculateMousePos(evt);
+  racqLY = mousePos.y - RACQ_HEIGHT / 2;
 }
 
 function rightRacqMove()
